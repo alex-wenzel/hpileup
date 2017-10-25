@@ -1,0 +1,12 @@
+##Output prefix
+prefix=test-pms2
+
+##The input regions
+input_bed=configs/input.bed
+
+##The reference genome
+reference=../NA12878_PMS2/ncbi37.fa
+
+##FakeFastq parameters
+readlen=1000
+overlap=0.75
