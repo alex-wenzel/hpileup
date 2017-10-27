@@ -13,6 +13,7 @@ This script defines the driver file for the pipeline
 """
 
 #Global
+import os
 import subprocess
 import sys
 
@@ -21,6 +22,7 @@ import tools.formats.Bed as Bed
 import tools.io.configs as configs
 
 #Local
+import Alignment
 import FakeFastq
 
 class Hpileup:
@@ -28,17 +30,27 @@ class Hpileup:
     def __init__(self, inputpath, configpath):
         """Takes the input bed and configuration path with pipeline options in key=value
         format and executes the pipeline"""
-        subprocess.call("mkdir data", shell=True)
+        if not os.path.exists("data/"):
+            subprocess.call("mkdir data", shell=True)
         self.inputbed = Bed.Bed(inputpath)
         self.config = configs.read_config_kv(configpath)
         
-        self.ffq = FakeFastq.FakeFastq(self.inputbed, self.config['reference'], 
+        ###Pipeline workflow starts here###
+        
+        ##Build a fastq file with reads from the reference genome
+        ##corresponding to the input bed file
+        """self.ffq = FakeFastq.FakeFastq(self.inputbed, self.config['reference'], 
                                         readlen=int(self.config['readlen']),
                                         overlap=float(self.config['overlap']))
-        self.ffq.save("data/input_ref_reads.fq")
+        self.ffq.save("data/input_ref_reads.fq")"""
+
+        ##Run the user-specified aligner on the FakeFastq output
+        self.aligner = Alignment.Alignment(self.config['aligner_name'], self.config['aligner'],
+                                            "data/input_ref_reads.fq", self.config['aligner_ref'],
+                                            "data/input_reads_aligned.sam")
 
 if __name__ == "__main__":
-    print("===============")
+    print("\n===============")
     print("=   hpileup   =")
     print("===============\n")
     try:
