@@ -28,12 +28,14 @@ class Hpileup:
     def __init__(self, inputpath, configpath):
         """Takes the input bed and configuration path with pipeline options in key=value
         format and executes the pipeline"""
+        subprocess.call("mkdir data", shell=True)
         self.inputbed = Bed.Bed(inputpath)
         self.config = configs.read_config_kv(configpath)
         
         self.ffq = FakeFastq.FakeFastq(self.inputbed, self.config['reference'], 
                                         readlen=int(self.config['readlen']),
                                         overlap=float(self.config['overlap']))
+        self.ffq.save("data/input_ref_reads.fq")
 
 if __name__ == "__main__":
     print("===============")
