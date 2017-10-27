@@ -4,9 +4,15 @@ prefix=test-pms2
 ##The input regions
 input_bed=configs/input.bed
 
-##The reference genome
-reference=../NA12878_PMS2/ncbi37.fa
-
 ##FakeFastq parameters
 readlen=1000
 overlap=0.75
+
+##aligner info
+#aligner_name=bwamem
+#aligner=/home/alexw/ucsd/rotations/bansal/bwamem/bwa/bwa
+#aligner_ref=/home/alexw/ucsd/rotations/bansal/NA12878_PMS2/ncbi37.fa
+
+aligner_name=bowtie
+aligner=/home/alexw/anaconda2/bin/bowtie
+aligner_ref=/home/alexw/ucsd/rotations/bansal/NA12878_PMS2/bowtie_hg19/hg19
