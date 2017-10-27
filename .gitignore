@@ -103,3 +103,8 @@ ENV/
 #linux
 *.swp
 *.swo
+
+#genomics
+*.fq
+*.fa
+*.vcf
