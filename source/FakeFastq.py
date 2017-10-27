@@ -6,6 +6,7 @@ a fraction overlap of their basepairs with the previous and next reads.
 
 #Global
 from Bio import SeqIO
+import sys
 
 #Repos
 import tools.formats.Bed as Bed
@@ -26,6 +27,60 @@ class FakeFastq:
         self.overlap = overlap
         self.fqrecs = []
 
+        print("FakeFastq: Generating reads...")
+        self.build_recs()
+
+    """
+    Record Building
+    """
+
+    def build_recs(self):
+        """Iterates through the bedfile and populates fqrecs with 
+        FakeFastqRec objects corresponding to the bed regions"""
+        for bedline in self.bedfile:
+            try:
+                chromseq = str(self.reference[bedline.chromosome].seq)
+            except KeyError:
+                print("ERROR: FakeFastq: Chromosome '"+bedline.chromosome+"' not found in reference fasta")
+                print("\tYour bed file chromosome names may not match your reference file naming convention")
+                sys.exit(1)
+            seq = chromseq[bedline.start-1:bedline.end]
+            print("FakeFastq: Building reads for "+str(bedline))
+            self.build_reads(seq)
+        print("FakeFastq: Done with all regions.")
+    
+    def build_reads(self, seq):
+        """Takes the sequence corresponding to the current bedfile in build_recs and populates
+        self.fqrecs with FakeFastqRec objects"""
+        indx = 0  #current position in seq (reads start from here)
+        rid = 1  #current unique record id for building FakeFastqRec objects
+        window_incr = self.readlen - int(self.readlen*self.overlap)  #the amount to increase indx on each iteration
+        while True:
+            subseq = seq[indx:indx+self.readlen]  #a section of the sequence of readlen length
+            if len(subseq) == 0:
+                break  #we've read the entire sequence and generated all necessary reads
+            #save a FakeFastqRec object with the subsequence and the next unique identifier
+            self.fqrecs.append(FakeFastqRec(subseq, "r"+str(rid)))
+            if len(subseq) < self.readlen:
+                break  #this is the last read
+            rid += 1  #increment the unique record identifier
+            indx += window_incr  #move the start of the next read
+
+    """
+    Saving reads
+    """
+
+    def save(self, outpath):
+        open(outpath, 'w').write(str(self))
+        print("FakeFastq: All regions saved to "+outpath)
+
+    """
+    Operators
+    """
+
+    def __str__(self):
+        return ''.join([str(read) for read in self.fqrecs])
+
 class FakeFastqRec:
     """A python representation of a simple fastq record containing the input
     fake seq, a unique recid, and a fake uniform high quality qual string"""
@@ -35,6 +90,10 @@ class FakeFastqRec:
         self.seq = seq
         self.recid = recid
         self.qual = "~"*len(self.seq)
+
+    """
+    Operators
+    """
 
     def __str__(self):
         """Returns the string representation of the FakeFastqRec - the four
