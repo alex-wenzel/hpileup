@@ -70,10 +70,10 @@ class Alignment:
     def call_aligner(self):
         """Uses subprocess to make calls to the aligner based on specified aligner name"""
         if self.aligner_name == "bowtie":
-            print("Alignment: Passing over execution to bowtie...")
+            print("Alignment: Handing over execution to bowtie...")
             subprocess.call(self.aligner+" -a -S "+self.refpath+" "+self.fastq_path+" > "+self.out_sam_path, shell=True)
         elif self.aligner_name == "bwamem":
-            print("Alignment: Passing over execution to BWA-MEM...")
+            print("Alignment: Handing over execution to BWA-MEM...")
             subprocess.call(self.aligner+" mem -a -t 2 "+self.refpath+" "+self.fastq_path+" > "+self.out_sam_path, shell=True)
 
 if __name__ == "__main__":
