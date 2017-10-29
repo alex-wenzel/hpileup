@@ -25,6 +25,7 @@ import tools.io.configs as configs
 #Local
 import Alignment
 import FakeFastq
+import FastaSubset
 
 class Hpileup:
     """Driver class for the pipeline, executes all analysis"""
@@ -46,12 +47,12 @@ class Hpileup:
         self.ffq.save("data/input_ref_reads.fq")"""
 
         ##Run the user-specified aligner on the FakeFastq output
-        self.aligner = Alignment.Alignment(self.config['aligner_name'], self.config['aligner'],
+        """self.aligner = Alignment.Alignment(self.config['aligner_name'], self.config['aligner'],
                                             "data/input_ref_reads.fq", self.config['aligner_ref'],
-                                            "data/input_reads_aligned.sam")
+                                            "data/input_reads_aligned.sam")"""
         
         ##Convert the aligned file to a set of bed regions
-        print("Hpileup: Converting data/input_reads_aligned.sam to bed format")
+        """print("Hpileup: Converting data/input_reads_aligned.sam to bed format")
         s2b = sam2bed.Sam2Bed("data/input_reads_aligned.sam")
 
         print("Hpileup: Saving regions to data/input_reads_aligned.bed")
@@ -64,8 +65,13 @@ class Hpileup:
         subprocess.call(self.config['bedtools2']+"mergeBed -i data/input_reads_aligned_sorted.bed > data/input_reads_aligned.bed", shell=True)
 
         print("Hpileup: Cleaning up intermediate files...")
-        subprocess.call("rm data/input_reads_aligned_sorted.bed", shell=True)
-        
+        subprocess.call("rm data/input_reads_aligned_sorted.bed", shell=True)"""
+
+        ##Create a FastaSubset for the input bed regions
+        print("Hpileup: Building a subset fasta file for the input regions...")
+        fs = FastaSubset.FastaSubset(self.config['reference'], self.inputbed)
+        fs.save("data/input_subset.fa")
+       
 
 if __name__ == "__main__":
     print("\n===============")
