@@ -16,14 +16,14 @@ import tools.formats.Bed as Bed
 class FastaSubset:
     """A class that builds a representation of a FASTA file containing only regions
     from an input bed file"""
-    def __init__(self, fastapath, bedpath):
-        print("FastaSubset: Loading input fasta file...")
+    def __init__(self, fastapath, bed):
         self.fastapath = fastapath
-        self.bedpath = bedpath
+        print("FastaSubset: Loading input fasta file...")
         self.input_fasta = SeqIO.index(self.fastapath, "fasta")
-        self.input_bed = Bed.Bed(self.bedpath)
+        self.input_bed = bed
         self.lines = []
         
+        print("FastaSubset: Building subset fasta...")
         self.parse()
     
     """
@@ -40,20 +40,31 @@ class FastaSubset:
             try:
                 seq = self.input_fasta[chrom].seq
             except KeyError:  #likely naming convention, try a couple possibilities
-                try:
-                    if "chr" in chrom:  #check if input fasta convention is without chr
-                        try:
-                            seq = self.input_fasta[chrom.replace("chr", "")].seq
-                        except KeyError:
-                            print("ERROR: FastaSubset: Could not find "+chrom+" in "+self.fastapath)
-                            print("\tCouldn't find "+chrom.replace("chr", "")+" either.")
-                            sys.exit(1)
-                    else:  #check if input fasta convention uses chr
-                        try:
-                            seq = self.input_fasta["chr"+chrom].seq
-                        except KeyError:
-                            print("ERROR: FastaSubset: Could not find "+chrom+" in "+self.fastapath)
-                            print("\tCoudln't find chr"+chrom+" either.")
+                if "chr" in chrom:  #check if input fasta convention is without chr
+                    try:
+                        seq = self.input_fasta[chrom.replace("chr", "")].seq
+                    except KeyError:
+                        print("ERROR: FastaSubset: Could not find "+chrom+" in "+self.fastapath)
+                        print("\tCouldn't find "+chrom.replace("chr", "")+" either.")
+                        sys.exit(1)
+                else:  #check if input fasta convention uses chr
+                    try:
+                        seq = self.input_fasta["chr"+chrom].seq
+                    except KeyError:
+                        print("ERROR: FastaSubset: Could not find "+chrom+" in "+self.fastapath)
+                        print("\tCoudln't find chr"+chrom+" either.")
+            self.lines.append(">"+chrom+"_"+str(recid)+'\n')  #make a new fasta header line
+            self.lines.append(str(seq[bedline.start-1:bedline.end])+'\n')  #make a new data line
+            recid += 1  #increment fasta record id for next record
+
+    """
+    Saving parsed subsets
+    """
+    
+    def save(self, outpath):
+        """Writes the records toa new fasta file"""
+        print("FastaSubset: Saving subset to "+outpath+"...")
+        open(outpath, 'w').writelines(self.lines)
 
 if __name__ == "__main__":
     print("FastaSubset.py")
