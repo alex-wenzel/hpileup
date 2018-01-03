@@ -28,58 +28,13 @@ from tools.io.Log import Log
 import Alignment
 import FakeFastq
 import FastaSubset
+import HomologMapping
 
 class Hpileup:
     """Driver class for the pipeline, executes all analysis"""
     #def __init__(self, inputpath, configpath):
     def __init__(self, args):
-        #Takes the input bed and configuration path with pipeline options in key=value
-        #format and executes the pipeline
-
         """Takes the argparse object from main and executes the full pipeline"""
-
-        ##old version 1/3/2018 - delete
-        """if not os.path.exists("data/"):
-            subprocess.call("mkdir data", shell=True)
-        self.inputbed = Bed.Bed(inputpath)
-        self.config = configs.read_config_kv(configpath)
-        
-        ###Pipeline workflow starts here###
-        
-        ##Build a fastq file with reads from the reference genome
-        ##corresponding to the input bed file
-        self.ffq = FakeFastq.FakeFastq(self.inputbed, self.config['reference'], 
-                                        readlen=int(self.config['readlen']),
-                                        overlap=float(self.config['overlap']))
-        self.ffq.save("data/input_ref_reads.fq")
-
-        ##Run the user-specified aligner on the FakeFastq output
-        self.aligner = Alignment.Alignment(self.config['aligner_name'], self.config['aligner'],
-                                            "data/input_ref_reads.fq", self.config['aligner_ref'],
-                                            "data/input_reads_aligned.sam")
-        
-        ##Convert the aligned file to a set of bed regions
-        print("Hpileup: Converting data/input_reads_aligned.sam to bed format")
-        s2b = sam2bed.Sam2Bed("data/input_reads_aligned.sam")
-
-        print("Hpileup: Saving regions to data/input_reads_aligned.bed")
-        s2b.save("data/input_reads_aligned.bed")
-
-        print("Hpileup: Calling bedtools2 to sort data/input_reads_aligned.bed")
-        subprocess.call(self.config['bedtools2']+"sortBed -i data/input_reads_aligned.bed > data/input_reads_aligned_sorted.bed", shell=True)
-
-        print("Hpileup: Calling bedtools2 to merge data/input_reads_aligned.bed")
-        subprocess.call(self.config['bedtools2']+"mergeBed -i data/input_reads_aligned_sorted.bed > data/input_reads_aligned.bed", shell=True)
-
-        print("Hpileup: Cleaning up intermediate files...")
-        subprocess.call("rm data/input_reads_aligned_sorted.bed", shell=True)
-
-        ##Create a FastaSubset for the input bed regions
-        #print("Hpileup: Building a subset fasta file for the input regions...")
-        #fs = FastaSubset.FastaSubset(self.config['reference'], self.inputbed)
-        #fs.save("data/input_subset.fa")"""
-
-        ##new version 1/3/2018
         self.l = Log()
         self.l.log("Loading "+args.input+"...")
         self.input_bed = Bed.Bed(args.input)
@@ -98,20 +53,21 @@ class Hpileup:
         #ffq.save(args.outdir+"artificial_reads.fq")
 
         ##Run the Bowtie 2 aligner on the artificial reads
-        Alignment.Alignment(args, args.outdir+"artificial_reads.fq", 
-                            args.outdir+"artificial_aligned.sam")
+        #Alignment.Alignment(args, args.outdir+"artificial_reads.fq", 
+        #                    args.outdir+"artificial_aligned.sam")
+
+        ##Run the HomologMapping scripts
+        self.l.log("Compiling all homologous reads...")
+        qm = HomologMapping.QnameMaps(args.outdir+"artificial_aligned.sam", args.input)
+        self.l.log("Merging homologous reads...")
+        mm = HomologMapping.MergedMaps(qm, filt_len=1000)
+        self.l.log("Saving ploidy info to "+args.outdir+"ploidy.bed")
+        mm.save(args.outdir+"ploidy.bed")
 
 if __name__ == "__main__":
     print("\n===============")
     print("=   hpileup   =")
     print("===============\n")
-    """try:
-        inputpath = sys.argv[1]
-        configpath = sys.argv[2]
-    except IndexError:
-        print("Usage: python hpileup.py <input_bed_path> <config_path>")
-        sys.exit(1)
-    Hpileup(inputpath, configpath)"""
     
     p = argparse.ArgumentParser(description="hpileup: A pipeline for variant calling in segdups")
 
