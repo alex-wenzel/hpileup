@@ -22,7 +22,7 @@ import sys
 #Repos
 import tools.converters.sam2bed as sam2bed
 import tools.formats.Bed as Bed
-import tools.io.configs as configs
+from tools.io.Log import Log
 
 #Local
 import Alignment
@@ -80,12 +80,26 @@ class Hpileup:
         #fs.save("data/input_subset.fa")"""
 
         ##new version 1/3/2018
+        self.l = Log()
+        self.l.log("Loading "+args.input+"...")
+        self.input_bed = Bed.Bed(args.input)
         
-        #create the output directory, if it does not exist
+        ##create the output directory, if it does not exist
+        self.l.log("Checking output directory...")
         if not os.path.exists(args.outdir):
+            self.l.log("Directory "+args.outdir+" does not exist, making it...", tabs=1)
             subprocess.call("mkdir "+args.outdir, shell=True)
         if args.outdir[-1] != "/":
             args.outdir = args.outdir+"/"
+
+        ##Generate FakeFastq file
+        #self.l.log("Generating the artificial FASTQ file for "+args.input+"...")
+        #ffq = FakeFastq.FakeFastq(self.input_bed, args.ref)
+        #ffq.save(args.outdir+"artificial_reads.fq")
+
+        ##Run the Bowtie 2 aligner on the artificial reads
+        Alignment.Alignment(args, args.outdir+"artificial_reads.fq", 
+                            args.outdir+"artificial_aligned.sam")
 
 if __name__ == "__main__":
     print("\n===============")
