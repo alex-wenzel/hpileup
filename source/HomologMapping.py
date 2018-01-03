@@ -253,12 +253,23 @@ class MergedMaps:
     Saving to bed file
     """
     
-    def save(self, outpath):
+    def save(self, outdir):
         """Writes self.hms post-merge to a bed file"""
+        ##saving ploidy
         outlines = []
         for hm in self.hms:
             outlines.append('\t'.join(map(str, [hm.chrom, hm.start, hm.end, len(hm.homs)]))+'\n')
-        open(outpath, 'w').writelines(outlines)
+        open(outdir+"ploidy.bed", 'w').writelines(outlines)
+        ##saving input+homologous bed
+        all_hms = []
+        for hm in self.hms:
+            all_hms.append(hm)
+            all_hms += [HomMap(hom[0], hom[1], hom[2], []) for hom in hm.homs]
+        all_hms = self.sort(all_hms)
+        outlines = []
+        for hm in all_hms:
+            outlines.append('\t'.join(map(str, [hm.chrom, hm.start, hm.end]))+'\n')
+        open(outdir+"input_homolog.bed", 'w').writelines(outlines)
 
 if __name__ == "__main__":
     print("HomologMapping.py")
