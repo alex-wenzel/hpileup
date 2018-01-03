@@ -110,3 +110,6 @@ ENV/
 *.vcf
 *.bed
 *.sam
+
+#testing
+PMS2/*
