@@ -10,6 +10,7 @@ import sys
 
 #Repos
 import tools.formats.Bed as Bed
+from tools.io.Log import Log
 
 #Local
 
@@ -19,15 +20,16 @@ class FakeFastq:
     def __init__(self, bedfile, refpath, readlen=1000, overlap=0.75):
         """Using the regions in bedfile, creates a fastq file with 'reads' generated
         from refpath of length readlen and overlap fraction overlap"""
-        print("FakeFastq: Loading input bed...")
+        self.l = Log()
+        self.l.log("FakeFastq: Loading input bed...", tabs=1)
         self.bedfile = bedfile
-        print("FakeFastq: Loading reference genome...")
+        self.l.log("FakeFastq: Loading reference genome...", tabs=1)
         self.reference = SeqIO.index(refpath, "fasta")
         self.readlen = readlen
         self.overlap = overlap
         self.fqrecs = []
 
-        print("FakeFastq: Generating reads...")
+        self.l.log("FakeFastq: Generating reads...", tabs=1)
         self.build_recs()
 
     """
@@ -41,13 +43,12 @@ class FakeFastq:
             try:
                 chromseq = str(self.reference[bedline.chromosome].seq)
             except KeyError:
-                print("ERROR: FakeFastq: Chromosome '"+bedline.chromosome+"' not found in reference fasta")
-                print("\tYour bed file chromosome names may not match your reference file naming convention")
-                sys.exit(1)
+                self.l.error("FakeFastq: Chromosome '"+bedline.chromosome+"' not found in reference fasta", 
+                                tabs=1, die=True, code=1)
             seq = chromseq[bedline.start-1:bedline.end]
-            print("FakeFastq: Building reads for "+str(bedline))
+            self.l.log("FakeFastq: Building reads for "+str(bedline)[:-1]+"...", tabs=1)
             self.build_reads(seq)
-        print("FakeFastq: Done with all regions.")
+        self.l.log("FakeFastq: Done with all regions", tabs=1)
     
     def build_reads(self, seq):
         """Takes the sequence corresponding to the current bedfile in build_recs and populates
@@ -72,7 +73,7 @@ class FakeFastq:
 
     def save(self, outpath):
         open(outpath, 'w').write(str(self))
-        print("FakeFastq: All regions saved to "+outpath)
+        self.l.log("FakeFastq: All regions saved to "+outpath, tabs=1)
 
     """
     Operators
