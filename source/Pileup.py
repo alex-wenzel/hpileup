@@ -34,7 +34,7 @@ class Pileup:
         """Calls the pipeline steps for each file in self.sam_paths"""
         self.l.log("Piling up reads from the input SAM/BAM files...")
         for sample_path in self.args.samples:
-            self.l.log("Pileup: Processing "+sample_path+"...", tabs=1)
+            self.l.log("Pileup: Processing "+sample_path+"...")
             ##convert from bam to sam if needed
             sample_path = self.check_for_bam(sample_path)
             outbase = ".".join(sample_path.split('.')[:-1])
@@ -59,7 +59,7 @@ class Pileup:
         """Checks if the input file is a bam file.  If so, convert it and return
         a new path, otherwise return the input path"""
         if sambam_path.split('.')[-1] == ".bam":
-            self.l.log("Converting "+sample_path+" to uncompressed SAM format...", tabs=2)
+            self.l.log("Converting "+sample_path+" to uncompressed SAM format...")
             return bam2sam(sambam_path)
         return sambam_path
 
@@ -80,7 +80,7 @@ class Pileup:
         """Takes a path to a sam file and filters it so that only the regions
         in the input and homologous regions are kept"""
         sampath = outbase+".sam"
-        self.l.log("Filtering "+sampath+" to contain reads in input or homlogs...", tabs=2)
+        self.l.log("Filtering "+sampath+" to contain reads in input or homlogs...")
         input_hom_bed_path = self.args.outdir+"input_homolog.bed"
         srf = SRF(sampath, input_hom_bed_path)
         srf.save(outbase+"_input-homolog.sam")
@@ -89,7 +89,7 @@ class Pileup:
         """Takes a path to a sam file and filters it so that only the regions
         in the input regions are kept"""
         sampath = outbase+"_input-homolog_realigned.sam"
-        self.l.log("Filtering "+sampath+" to contain reads in input regions only...", tabs=2)
+        self.l.log("Filtering "+sampath+" to contain reads in input regions only...")
         input_bed_path = self.args.outdir+"input.bed"
         srf = SRF(sampath, input_bed_path)
         srf.save(outbase+"_realigned_input.sam")
@@ -105,17 +105,15 @@ class Pileup:
         sampath = outbase+"_input-homolog.sam"
         collated_out = outbase+"_input-homolog_collated"
         fastq_out = outbase+"_input-homolog.fq"
-        self.l.log("Reverting "+sampath+" to FASTQ...", tabs=2)
+        self.l.log("Reverting "+sampath+" to FASTQ...")
 
         cmd = samtools+" collate -u -n 1 -l 1 --output-fmt SAM "+sampath+" "+collated_out
-        self.l.log(cmd, tabs=3)
+        self.l.log(cmd)
         subprocess.call(cmd, shell=True)
 
         cmd = samtools+" fastq "+collated_out+".sam > "+fastq_out
-        self.l.log(cmd, tabs=3)
-        print("")
+        self.l.log(cmd)
         subprocess.call(cmd, shell=True)
-        print("")
 
     """
     Alignment wrapper
@@ -125,7 +123,7 @@ class Pileup:
         """Calls the Alignment class, which calls Bowtie2 to realign reads"""
         input_fq = outbase+"_input-homolog.fq"
         output_sam = outbase+"_input-homolog_realigned.sam"
-        self.l.log("Aligning "+input_fq+ " to the genome (output at "+output_sam+")...", tabs=2)
+        self.l.log("Aligning "+input_fq+ " to the genome (output at "+output_sam+")...")
         Alignment(self.args, input_fq, output_sam)
 
 if __name__ == "__main__":

@@ -28,10 +28,10 @@ class Alignment:
         self.out_sam_path = out_sam_path
         self.l = Log()
         
-        self.l.log("Alignment: Preparing to align "+self.fastq_path+" to "+args.bowtie2_ref, tabs=1)
-        self.l.log("Alignment: Checking file locations...", tabs=1)
+        self.l.log("Alignment: Preparing to align "+self.fastq_path+" to "+args.bowtie2_ref)
+        self.l.log("Alignment: Checking file locations...")
         self.check_files()
-        self.l.log("Alignment: Reference files ready, preparing to call Bowtie...", tabs=1)
+        self.l.log("Alignment: Reference files ready, preparing to call Bowtie...")
         self.call_aligner()
 
     """
@@ -43,7 +43,7 @@ class Alignment:
         and in the right place"""
         if not os.path.isfile(self.args.bowtie2_ref+".1.bt2"):  #check if user has generated bowtie ref files
             self.l.error("Alignment: Valid bowtie reference files not found at "+self.args.bowtie2_ref,
-                            die=True, code=1, tabs=2)
+                            die=True, code=1)
 
     """
     Alignment Wrapping
@@ -54,11 +54,9 @@ class Alignment:
         cmd = self.args.bowtie2_loc+" -x "+self.args.bowtie2_ref
         cmd += " -p "+str(self.args.threads)+" -k 10 -U "
         cmd += self.fastq_path+" -S "+self.out_sam_path
-        self.l.log("Calling Bowtie 2 with the following command...\n\n\t\t\t"+cmd, tabs=2)
-        print("")
+        self.l.log("Calling Bowtie 2 with the following command...\n\t"+cmd)
         subprocess.call(cmd, shell=True)
-        print("")
-        self.l.log("Bowtie 2 finished", tabs=2)
+        self.l.log("Bowtie 2 finished")
 
 if __name__ == "__main__":
     print("Alignment.py")

@@ -21,15 +21,15 @@ class FakeFastq:
         """Using the regions in bedfile, creates a fastq file with 'reads' generated
         from refpath of length readlen and overlap fraction overlap"""
         self.l = Log()
-        self.l.log("FakeFastq: Loading input bed...", tabs=1)
+        self.l.log("FakeFastq: Loading input bed...")
         self.bedfile = bedfile
-        self.l.log("FakeFastq: Loading reference genome...", tabs=1)
+        self.l.log("FakeFastq: Loading reference genome...")
         self.reference = SeqIO.index(refpath, "fasta")
         self.readlen = readlen
         self.overlap = overlap
         self.fqrecs = []
 
-        self.l.log("FakeFastq: Generating reads...", tabs=1)
+        self.l.log("FakeFastq: Generating reads...")
         self.build_recs()
 
     """
@@ -44,11 +44,11 @@ class FakeFastq:
                 chromseq = str(self.reference[bedline.chromosome].seq)
             except KeyError:
                 self.l.error("FakeFastq: Chromosome '"+bedline.chromosome+"' not found in reference fasta", 
-                                tabs=1, die=True, code=1)
+                                die=True, code=1)
             seq = chromseq[bedline.start-1:bedline.end]
-            self.l.log("FakeFastq: Building reads for "+str(bedline)[:-1]+"...", tabs=1)
+            self.l.log("FakeFastq: Building reads for "+str(bedline)[:-1]+"...")
             self.build_reads(seq)
-        self.l.log("FakeFastq: Done with all regions", tabs=1)
+        self.l.log("FakeFastq: Done with all regions")
     
     def build_reads(self, seq):
         """Takes the sequence corresponding to the current bedfile in build_recs and populates
@@ -73,7 +73,7 @@ class FakeFastq:
 
     def save(self, outpath):
         open(outpath, 'w').write(str(self))
-        self.l.log("FakeFastq: All regions saved to "+outpath, tabs=1)
+        self.l.log("FakeFastq: All regions saved to "+outpath)
 
     """
     Operators

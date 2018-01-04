@@ -44,27 +44,27 @@ class Hpileup:
         ##create the output directory, if it does not exist
         self.l.log("Checking output directory...")
         if not os.path.exists(self.args.outdir):
-            self.l.log("Directory "+self.args.outdir+" does not exist, making it...", tabs=1)
+            self.l.log("Directory "+self.args.outdir+" does not exist, making it...")
             subprocess.call("mkdir "+self.args.outdir, shell=True)
         if self.args.outdir[-1] != "/":
             self.args.outdir = self.args.outdir+"/"
 
         ##Generate FakeFastq file
-        #self.l.log("Generating the artificial FASTQ file for "+self.args.input+"...")
-        #ffq = FakeFastq.FakeFastq(self.input_bed, self.args.ref)
-        #ffq.save(self.args.outdir+"artificial_reads.fq")
+        self.l.log("Generating the artificial FASTQ file for "+self.args.input+"...")
+        ffq = FakeFastq.FakeFastq(self.input_bed, self.args.ref)
+        ffq.save(self.args.outdir+"artificial_reads.fq")
 
         ##Run the Bowtie 2 aligner on the artificial reads
-        #Alignment.Alignment(self.args, self.args.outdir+"artificial_reads.fq", 
-        #                    self.args.outdir+"artificial_aligned.sam")
+        Alignment.Alignment(self.args, self.args.outdir+"artificial_reads.fq", 
+                            self.args.outdir+"artificial_aligned.sam")
 
         ##Run the HomologMapping scripts
-        #self.l.log("Compiling all homologous reads...")
-        #qm = HomologMapping.QnameMaps(self.args.outdir+"artificial_aligned.sam", self.args.input)
-        #self.l.log("Merging homologous reads...")
-        #mm = HomologMapping.MergedMaps(qm, filt_len=1000)
-        #self.l.log("Saving ploidy info to "+self.args.outdir+"ploidy.bed")
-        #mm.save(self.args.outdir)
+        self.l.log("Compiling all homologous reads...")
+        qm = HomologMapping.QnameMaps(self.args.outdir+"artificial_aligned.sam", self.args.input)
+        self.l.log("Merging homologous reads...")
+        mm = HomologMapping.MergedMaps(qm, filt_len=1000)
+        self.l.log("Saving ploidy info to "+self.args.outdir+"ploidy.bed")
+        mm.save(self.args.outdir)
 
         ##Sam pileup
         p = Pileup(self.args)
