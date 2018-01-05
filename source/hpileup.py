@@ -31,6 +31,7 @@ import FastaSubset
 import HomologMapping
 from Pileup import Pileup
 from SamRegionFilter import SamRegionFilter as SRF
+from VariantCalling import VariantCalling
 
 class Hpileup:
     """Driver class for the pipeline, executes all analysis"""
@@ -67,7 +68,10 @@ class Hpileup:
         mm.save(self.args.outdir)
 
         ##Sam pileup
-        p = Pileup(self.args)
+        Pileup(self.args)
+
+        ##Variant Calling
+        VariantCalling(self.args)
 
 if __name__ == "__main__":
     print("\n===============")
@@ -84,6 +88,8 @@ if __name__ == "__main__":
                     help="Paths to one or more SAM/BAM files (BAMs will be converted to SAMs)")
     p.add_argument("-g", "--gatk", required=True,
                     help="Path to the GenomeAnalysisTK jar")
+    p.add_argument("-p", "--picard", required=True,
+                    help="Path to the Picard jar")
     p.add_argument("--outdir", default="./", help="The directory to use for results")
     p.add_argument("--bowtie2_loc", default="bowtie2",
                     help="If Bowtie2 is not in your PATH, use this option to specify its location")
